@@ -23,16 +23,8 @@ jobs:
         distribution: 'zulu'
         cache: gradle
 
-    - name: Setup Android SDK, NDK & CMake
-      id: setup-android
-      uses: android-actions/setup-android@v3
-      with:
-        ndk-version: '25.1.8937393'
-        cmake-version: '3.22.1'
-
     - name: Configure Gradle Memory Limits
       run: |
-        # อัปเกรดแรมขยายพื้นที่ให้ Java Heap Space เพื่อป้องกันการล่มตอนรวมไฟล์
         mkdir -p ~/.gradle
         echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> ~/.gradle/gradle.properties
         echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> gradle.properties
@@ -42,7 +34,12 @@ jobs:
 
     - name: Build with Gradle
       env:
-        ANDROID_NDK_ROOT: ${{ steps.setup-android.outputs.ndk-path }}
-        # บังคับเพิ่มออปชันหน่วยความจำตอนสั่งรันตรงๆ อีกชั้นหนึ่ง
         _JAVA_OPTIONS: "-Xmx4096m"
-      run: ./gradlew assembleDebug -Pandroid.ndkVersion=25.1.8937393 --no-daemon
+      run: ./gradlew assembleDebug --no-daemon
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        # เปลี่ยนวิธีระบุ Path ให้ค้นหาทุกที่ที่ลงท้ายด้วย .apk ป้องกันปัญหาโฟลเดอร์ผลลัพธ์คลาดเคลื่อน
+        path: "**/build/outputs/apk/**/*.apk"
