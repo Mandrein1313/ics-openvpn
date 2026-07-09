@@ -24,6 +24,7 @@ jobs:
         cache: gradle
 
     - name: Setup Android SDK, NDK & CMake
+      id: setup-android
       uses: android-actions/setup-android@v3
       with:
         ndk-version: '25.1.8937393'
@@ -33,7 +34,6 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build with Gradle
-      # บังคับใช้ NDK เวอร์ชัน 25 ตรงๆ ตอนสั่งบิวด์เพื่อไม่ให้ระบบหลุดไปใช้เวอร์ชัน 30
       env:
-        ANDROID_NDK_ROOT: ${{ 本.android-actions/setup-android.outputs.ndk-path }}
+        ANDROID_NDK_ROOT: ${{ steps.setup-android.outputs.ndk-path }}
       run: ./gradlew assembleDebug -Pandroid.ndkVersion=25.1.8937393
